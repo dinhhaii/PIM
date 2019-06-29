@@ -1,5 +1,8 @@
 package com.pim.dom;
 
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
+
 import javax.persistence.*;
 import java.util.Date;
 import java.util.HashSet;
@@ -12,7 +15,8 @@ public class Employee implements IBaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "version", length = 10, nullable = false)
+    @Version
+    @Column(name = "version", length = 10)
     private Integer version;
     @Column(name = "visa", length = 3, nullable = false)
     private String visa;
@@ -23,6 +27,11 @@ public class Employee implements IBaseEntity {
     @Column(name = "birth_date", nullable = false)
     @Temporal(TemporalType.DATE)
     private Date birthDate;
+
+//    @OneToOne(mappedBy="group_leader")
+//    @PrimaryKeyJoinColumn
+//    @NotFound(action=NotFoundAction.IGNORE)
+//    private Group group;
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.ALL}, mappedBy = "employees")
     private Set<Project> projects = new HashSet<>();

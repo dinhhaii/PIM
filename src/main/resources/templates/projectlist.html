@@ -100,15 +100,15 @@
                             <tr th:if="${projects.empty}">
                                 <td class="col-center">No Projects Available</td>
                             </tr>
-                            <tr class="clickable-row" th:each="project: ${projects}" th:data-href="@{'/editproject/' + ${project.id}}">
+                            <tr class="clickable-row" th:each="project: ${projects}">
                                 <td class="col-center unclickable">
                                     <input name="" type="checkbox" class="checkitem" th:value="${project.id}">
                                 </td>
-                                <td class="col-right" th:text="${project.projectnumber}"></td>
-                                <td class="col-left" th:text="${project.status}"></td>
-                                <td class="col-left" th:each="status : ${statusList}" th:if="${status.key} == ${project.status}" th:text="${status.value}"></td>
-                                <td class="col-left" th:text="${project.customer}"></td>
-                                <td class="col-center" th:text="${#dates.format(project.startDate, 'dd-MM-yyyy')}"></td>
+                                <td th:data-href="@{'/editproject/' + ${project.id}}" class="col-right" th:text="${project.projectnumber}"></td>
+                                <td th:data-href="@{'/editproject/' + ${project.id}}" class="col-left" th:text="${project.name}"></td>
+                                <td th:data-href="@{'/editproject/' + ${project.id}}" class="col-left" th:each="status : ${statusList}" th:if="${status.key} == ${project.status}" th:text="${status.value}"></td>
+                                <td th:data-href="@{'/editproject/' + ${project.id}}" class="col-left" th:text="${project.customer}"></td>
+                                <td th:data-href="@{'/editproject/' + ${project.id}}" class="col-center" th:text="${#dates.format(project.startDate, 'dd-MM-yyyy')}"></td>
                                 <td class="col-center unclickable" th:if="${project.status} == 'NEW'">
                                     <form th:action="@{/deleteproject}" method="POST">
                                         <input type="hidden" name="id" th:value="${project.id}">

@@ -4,15 +4,26 @@ package com.pim.service;
 import com.pim.dao.IProjectRepository;
 import com.pim.dom.Project;
 import com.pim.dom.QProject;
+import com.pim.exception.ProjectNumberAlreadyExistsException;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.JPQLQuery;
+import com.querydsl.jpa.impl.JPAQuery;
+import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import java.util.*;
 import java.util.stream.StreamSupport;
 
 @Service
 public class ProjectService implements IProjectService{
+    @PersistenceContext
+    private EntityManager entityManager;
+    private SessionFactory sessionFactory;
+
     private IProjectRepository projectRepository;
 
     private Map<String,String> statusList = new HashMap<String,String>(){
@@ -31,7 +42,11 @@ public class ProjectService implements IProjectService{
 
     @Override
     public List<Project> findAll() {
-        return projectRepository.findAll();
+        QProject project = QProject.project;
+        JPQLQuery query = new JPAQuery(entityManager);
+        List<Project> projects = query.from(project).fetch();
+        return projects;
+//        return projectRepository.findAll();
     }
 
     @Override
@@ -41,16 +56,18 @@ public class ProjectService implements IProjectService{
     }
 
     @Override
-    public Project findByProjectNumber(Integer projectnumber) {
+    public Project findByProjectNumber(Integer projectnumber) throws ProjectNumberAlreadyExistsException {
         BooleanExpression booleanExpression = QProject.project.projectnumber.eq(projectnumber);
         Iterable<Project> projects = projectRepository.findAll(booleanExpression);
+
         long length = StreamSupport.stream(projects.spliterator(), false).count();
         if(length == 0){
             return null;
         }
         else{
-            List<Project> projectList = convertIterableToList(projects);
-            return projectList.get(0);
+//            List<Project> projectList = convertIterableToList(projects);
+//            return projectList.get(0);
+            throw new ProjectNumberAlreadyExistsException("The project number already existed.");
         }
     }
 
@@ -71,7 +88,10 @@ public class ProjectService implements IProjectService{
 
     @Override
     public void deleteById(Long id) {
-        projectRepository.deleteById(id);
+        QProject project = QProject.project;
+        Query query = entityManager.createQuery("delete from project where id = :projectid");
+        query.setParameter("projectid",id);
+        query.executeUpdate();
     }
 
     @Override

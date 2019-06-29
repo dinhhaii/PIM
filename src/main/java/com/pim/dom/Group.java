@@ -1,7 +1,13 @@
 package com.pim.dom;
 
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
+
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -11,13 +17,17 @@ public class Group implements IBaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "version", length = 10, nullable = false)
+    @Version
+    @Column(name = "version", length = 10)
     private Integer version;
 
-    @OneToOne
-    @JoinColumn(name = "group_leader_id", nullable = false)
+    @ManyToOne
+    @NotFound(action= NotFoundAction.IGNORE)
+    @JoinColumn(name = "group_leader_id")
     private Employee group_leader;
 
+    @OneToMany(mappedBy = "group", orphanRemoval = true, cascade = CascadeType.ALL)
+    private List<Project> projects = new ArrayList<>();
 
     public Group(){}
 
@@ -48,6 +58,14 @@ public class Group implements IBaseEntity {
 
     public void setGroup_leader(Employee group_leader) {
         this.group_leader = group_leader;
+    }
+
+    public List<Project> getProjects() {
+        return projects;
+    }
+
+    public void setProjects(List<Project> projects) {
+        this.projects = projects;
     }
 
     @Override

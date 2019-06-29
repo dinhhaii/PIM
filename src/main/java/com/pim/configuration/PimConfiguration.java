@@ -9,6 +9,7 @@ import com.pim.service.EmployeeService;
 import com.pim.service.GroupService;
 import com.pim.service.IProjectService;
 import com.pim.service.ProjectService;
+import org.hibernate.SessionFactory;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;

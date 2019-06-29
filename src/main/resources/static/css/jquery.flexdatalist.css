@@ -71,15 +71,15 @@
     clear: both;
 }
 .flexdatalist-multiple {
-    width: 40%;
-    margin: 1px 3px 0px 3px;
+    width: 60%;
+    margin: 0;
     padding: 0;
     list-style: none;
     text-align: left;
     cursor: text;
     height: 30px;
-    position: absolute;
-    display: inline-flex;
+    /*position: absolute;*/
+    display: inline-table;
 }
 .flexdatalist-multiple.disabled {
     background-color: #eee;

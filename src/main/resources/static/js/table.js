@@ -38,5 +38,5 @@ $('#deleteselected').click(function() {
 
 //Click Row to go to Edit Page
 $('.clickable-row').children('td:not(.unclickable)').click(function(){
-    window.location = $('.clickable-row').data("href");
+    window.location = $(this).data("href");
 });

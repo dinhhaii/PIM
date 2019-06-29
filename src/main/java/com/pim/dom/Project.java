@@ -11,7 +11,8 @@ public class Project {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "version", length = 10, nullable = false)
+    @Version
+    @Column(name = "version", length = 10)
     private Integer version;
     @Column(name = "project_number", length = 4, nullable = false)
     private Integer projectnumber;
@@ -147,7 +148,7 @@ public class Project {
 
     @Override
     public String toString() {
-        return "Project{" +
+        return "\tProject{" +
                 "id=" + id +
                 ", version=" + version +
                 ", projectnumber=" + projectnumber +
@@ -156,8 +157,8 @@ public class Project {
                 ", status='" + status + '\'' +
                 ", startDate=" + startDate +
                 ", endDate=" + endDate +
-                ", group=" + group +
-                ", employees=" + employees +
+                ",\n\tgroup=" + group +
+                ",\n\temployees=" + employees +
                 '}';
     }
 }
