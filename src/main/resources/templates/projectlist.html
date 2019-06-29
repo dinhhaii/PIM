@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<head>
+    <title>Project Information Management</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!-- Datepicker -->
+    <link href="https://unpkg.com/gijgo@1.9.13/css/gijgo.min.css" rel="stylesheet" type="text/css" />
+    <link th:href="@{/css/style.css}" type="text/css" rel="stylesheet" />
+</head>
+
+<body>
+<!-- Navgation Bar -->
+<nav class="nav nav-pim">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-8 nav-info">
+                <a href="/"><img th:src="@{/img/logo_elca.png}" class="logo"></a>
+                Project Information Management
+            </div>
+            <div class="col-2 nav-selection">
+                <label class="nav-selection-custom active" id="en-label" for="en">EN</label>
+                <input type="radio" name="language" id="en" value="EN"/>
+                <label class="nav-selection-custom">|</label>
+                <label class="nav-selection-custom" id="fr-label" for="fr">FR</label>
+                <input type="radio" name="language" id="fr" value="FR"/>
+            </div>
+            <div class="col-2 nav-selection">
+                <a class="nav-selection-custom" href="#" th:utext="#{label.help}"></a>
+                <a class="nav-selection-custom" href="#" th:utext="#{label.login}"></a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Main -->
+<div class="main">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-3">
+                <div class="sidebar">
+                    <ul class="navbar-nav accordion">
+                        <li class="nav-item">
+                            <a class="sidebar-brand active"
+                               th:href="@{/}" th:utext="#{label.projectlist}"></a>
+                        </li>
+                        <!-- Items -->
+                        <li class="nav-item">
+                            <a class="sidebar-brand" th:href="@{/newproject}" th:utext="#{label.new}"></a>
+
+                            <nav class="nav flex-direction-column mt-10">
+                                <a class="nav-link" th:href="@{/newproject}" th:utext="#{label.project}"></a>
+                                <a class="nav-link" th:href="@{/newproject}" th:utext="#{label.customer}"></a>
+                                <a class="nav-link" th:href="@{/newproject}" th:utext="#{label.supplier}"></a>
+                            </nav>
+
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-9">
+                <div class="content">
+                    <div class="content-header" th:utext="#{label.projectlist}"></div>
+                    <div class="content-body">
+                        <form>
+                            <div class="form-group form-search">
+                                <input type="text" class="form-control ratio-30" aria-describedby="helpId" th:placeholder="#{label.placeholdersearch}">
+                                <select class="form-control ratio-20" th:placeholder="#{label.placeholderstatus}">
+                                    <option th:each="status:${statusList}" th:value="${status.key}" th:text="${status.value}"></option>
+                                </select>
+                                <button type="submit" class="btn btn-search ratio-20" th:utext="#{button.searchproject}"></button>
+                                <a class="btn btn-resetsearch ratio-20" href="#" role="button" th:utext="#{button.resetsearch}"></a>
+                            </div>
+                        </form>
+
+                        <table class="table table-borderless table-hover table-pim" id="tblProject">
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th scope="col" th:utext="#{label.number}">Number</th>
+                                <th scope="col" th:utext="#{label.name}">Name</th>
+                                <th scope="col" th:utext="#{label.status}">Status</th>
+                                <th scope="col" th:utext="#{label.customer}">Customer</th>
+                                <th scope="col" th:utext="#{label.startdate}">Start Date</th>
+                                <th scope="col" th:utext="#{label.delete}">Delete</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:if="${projects.empty}">
+                                <td class="col-center">No Projects Available</td>
+                            </tr>
+                            <tr class="clickable-row" th:each="project: ${projects}" th:data-href="@{'/editproject/' + ${project.id}}">
+                                <td class="col-center unclickable">
+                                    <input name="" type="checkbox" class="checkitem" th:value="${project.id}">
+                                </td>
+                                <td class="col-right" th:text="${project.projectnumber}"></td>
+                                <td class="col-left" th:text="${project.status}"></td>
+                                <td class="col-left" th:each="status : ${statusList}" th:if="${status.key} == ${project.status}" th:text="${status.value}"></td>
+                                <td class="col-left" th:text="${project.customer}"></td>
+                                <td class="col-center" th:text="${#dates.format(project.startDate, 'dd-MM-yyyy')}"></td>
+                                <td class="col-center unclickable" th:if="${project.status} == 'NEW'">
+                                    <form th:action="@{/deleteproject}" method="POST">
+                                        <input type="hidden" name="id" th:value="${project.id}">
+                                        <button type="submit" class="deleteitem delete"><i class="fa fa-trash" aria-hidden="true"></i></button>
+                                    </form>
+                                </td>
+                                <td class="col-center" th:unless="${project.status} == 'NEW'"></td>
+                            </tr>
+                            </tbody>
+                            <tfoot id="tblfoot">
+                            <tr>
+                                <td colspan="7" class="tfoot-td">
+                                    <p id="numberselecteditem" class="f-left selecteditem" th:utext="#{label.itemselected}"></p>
+                                    <button id="deleteselected" class="f-right deleteitem delete" >
+                                        <span th:utext="#{label.deleteselecteditems}"></span>
+                                        <i class="fa fa-trash" aria-hidden="true"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            </tfoot>
+                        </table>
+
+                        <nav class="paging">
+                            <ul class="pagination">
+                                <li class="page-item">
+                                    <a class="page-link" href="#" aria-label="Previous">
+                                        <img th:src="@{/img/previous_page.png}">
+                                    </a>
+                                </li>
+                                <li class="page-item"><a class="page-link" href="#">1</a></li>
+                                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#" aria-label="Previous">
+                                        <img th:src="@{/img/nextpage_icon.png}">
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+
+<script th:src="@{/js/multilangual.js}"></script>
+<script th:src="@{/js/table.js}"></script>
+</body>
+
+</html>
