@@ -4,6 +4,7 @@ package com.pim.controller;
 import com.pim.dom.Employee;
 import com.pim.dom.Group;
 import com.pim.dom.Project;
+import com.pim.exception.ProjectNotExistsException;
 import com.pim.exception.ProjectNumberAlreadyExistsException;
 import com.pim.service.EmployeeService;
 import com.pim.service.GroupService;
@@ -40,37 +41,43 @@ public class ApplicationController {
 
     @RequestMapping(value = {"/editproject/{id}"}, method = RequestMethod.GET)
     public String editProject(Model model, @PathVariable Long id){
-        Project project = projectService.findById(id);
-        Map<String,String> statusList = projectService.statusList();
-        List<Employee> employees = employeeService.findAll();
-        List<Group> groups = groupService.findAll();
-        Set<Employee> memberSet = project.getEmployees();
-        List<Employee> memberList = new ArrayList<>(memberSet);
+        try {
+            Project project = projectService.findById(id);
+            Map<String, String> statusList = projectService.statusList();
+            List<Employee> employees = employeeService.findAll();
+            List<Group> groups = groupService.findAll();
+            Set<Employee> memberSet = project.getEmployees();
+            List<Employee> memberList = new ArrayList<>(memberSet);
 
-        StringBuilder members = new StringBuilder("");
-        for(int i =0;i<memberList.size();i++){
-            Employee employee = memberList.get(i);
-            String visa = employee.getVisa();
-            String firstName = employee.getFirstName();
-            String lastName = employee.getLastName();
+            StringBuilder members = new StringBuilder("");
+            for (int i = 0; i < memberList.size(); i++) {
+                Employee employee = memberList.get(i);
+                String visa = employee.getVisa();
+                String firstName = employee.getFirstName();
+                String lastName = employee.getLastName();
 
-            members.append(visa);
-            members.append(":");
-            members.append(firstName);
-            members.append(lastName);
-            members.append(",");
+                members.append(visa);
+                members.append(":");
+                members.append(firstName);
+                members.append(lastName);
+                members.append(",");
+            }
+
+            String memberInput = members.toString();
+            int length = memberInput.length();
+            memberInput = memberInput.substring(0, length - 1);
+
+            model.addAttribute("members", memberInput);
+            model.addAttribute("project", project);
+            model.addAttribute("groups", groups);
+            model.addAttribute("statusList", statusList);
+            model.addAttribute("employees", employees);
+            return "editproject";
         }
-
-        String memberInput = members.toString();
-        int length = memberInput.length();
-        memberInput = memberInput.substring(0,length-1);
-
-        model.addAttribute("members", memberInput);
-        model.addAttribute("project", project);
-        model.addAttribute("groups", groups);
-        model.addAttribute("statusList", statusList);
-        model.addAttribute("employees", employees);
-        return "editproject";
+        catch (ProjectNotExistsException e){
+            e.printStackTrace();
+            return "redirect:/";
+        }
     }
 
     @RequestMapping(value = {"/editproject/{id}"}, method = RequestMethod.POST,
@@ -137,10 +144,15 @@ public class ApplicationController {
 
     @RequestMapping(value = "/deleteproject", method = RequestMethod.POST)
     public String deleteProject(@RequestParam(name = "id") Long id){
-        Project project = projectService.findById(id);
-        System.out.println(project);
-        projectService.deleteById(id);
-        return "redirect:/projectlist";
+        try {
+            Project project = projectService.findById(id);
+            System.out.println(project);
+            projectService.deleteById(id);
+            return "redirect:/projectlist";
+        }catch (ProjectNotExistsException e){
+            e.printStackTrace();
+            return "redirect:/projectlist";
+        }
     }
 
     @RequestMapping(value = "/createproject/is-available-projectnumber", method = RequestMethod.GET)

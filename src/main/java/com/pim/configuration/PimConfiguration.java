@@ -24,23 +24,25 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 
+import javax.persistence.EntityManagerFactory;
+
 @Configuration
 @EnableAutoConfiguration
 @ComponentScan(basePackageClasses = {PimApplication.class, ApplicationController.class, IProjectService.class})
 public class PimConfiguration implements WebMvcConfigurer {
     @Bean
-    public static ProjectService projectService(IProjectRepository projectRepository){
-        return new ProjectService(projectRepository);
+    public static ProjectService projectService(IProjectRepository projectRepository, EntityManagerFactory entityManagerFactory){
+        return new ProjectService(projectRepository, entityManagerFactory);
     }
 
     @Bean
-    public static GroupService groupService(IGroupRepository groupRepository){
-        return new GroupService(groupRepository);
+    public static GroupService groupService(IGroupRepository groupRepository, EntityManagerFactory entityManagerFactory){
+        return new GroupService(groupRepository,entityManagerFactory );
     }
 
     @Bean
-    public static EmployeeService employeeService(IEmployeeRepository employeeRepository){
-        return new EmployeeService(employeeRepository);
+    public static EmployeeService employeeService(IEmployeeRepository employeeRepository, EntityManagerFactory entityManagerFactory){
+        return new EmployeeService(employeeRepository, entityManagerFactory);
     }
 
     @Bean(name = "localeResolver")
@@ -55,7 +57,7 @@ public class PimConfiguration implements WebMvcConfigurer {
     @Bean(name="messageSource")
     public MessageSource getMessageResource() {
         ReloadableResourceBundleMessageSource messageResource= new ReloadableResourceBundleMessageSource();
-        // Read i18n/messages_xxx.properties file.
+        // Read language/messages_xxx.properties file.
         // For example: messages_en.properties
         messageResource.setBasename("classpath:language/messages");
         messageResource.setDefaultEncoding("UTF-8");

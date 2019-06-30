@@ -37,7 +37,7 @@ public class Employee implements IBaseEntity {
     private Set<Project> projects = new HashSet<>();
 
 
-    public Employee(){
+    public Employee() {
     }
 
     public Employee(String visa, String firstName, String lastName, Date birthDate, Integer version) {
@@ -106,13 +106,14 @@ public class Employee implements IBaseEntity {
 
     @Override
     public String toString() {
-        return "Employee{" +
+        return "\tEmployee{" +
                 "id=" + id +
                 ", version=" + version +
                 ", visa='" + visa + '\'' +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", birthDate=" + birthDate +
+                ", \n\tprojects=" + projects +
                 '}';
     }
 }

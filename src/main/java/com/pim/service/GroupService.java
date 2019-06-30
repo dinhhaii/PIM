@@ -2,9 +2,11 @@ package com.pim.service;
 
 import com.pim.dao.IGroupRepository;
 import com.pim.dom.Group;
+import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityManagerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -12,9 +14,14 @@ import java.util.Optional;
 @Service
 public class GroupService implements IGroupService {
     private IGroupRepository groupRepository;
+    private SessionFactory sessionFactory;
 
     @Autowired
-    public GroupService(IGroupRepository groupRepository) {
+    public GroupService(IGroupRepository groupRepository, EntityManagerFactory entityManagerFactory) {
+        if(entityManagerFactory.unwrap(SessionFactory.class) == null){
+            throw new NullPointerException("Factory is not a hibernate factory");
+        }
+        this.sessionFactory = entityManagerFactory.unwrap(SessionFactory.class);
         this.groupRepository = groupRepository;
     }
 

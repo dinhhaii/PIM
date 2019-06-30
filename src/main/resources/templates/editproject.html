@@ -117,11 +117,11 @@
                             <div class="form-group">
                                 <label class="pl-40" for="datepickerStart" th:utext="#{label.startdate}"><span class="required"> *</span></label>
                                 <div class="d-inline-block">
-                                    <input id="datepickerStart" name="startDate" class="form-control" th:value="${#dates.format(project.startDate, 'MM-dd-yyyy')}"/>
+                                    <input id="datepickerStart" name="startDate" class="form-control" th:value="${#dates.format(project.startDate, 'MM/dd/yyyy')}"/>
                                 </div>
                                 <label class="pl-60" for="datepickerEnd" th:utext="#{label.enddate}"></label>
                                 <div class="d-inline-block">
-                                    <input id="datepickerEnd" name="endDate" class="form-control" th:value="${#dates.format(project.endDate, 'MM-dd-yyyy')}"/>
+                                    <input id="datepickerEnd" name="endDate" class="form-control" th:value="${#dates.format(project.endDate, 'MM/dd/yyyy')}"/>
                                 </div>
 
 

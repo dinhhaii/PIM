@@ -21,7 +21,7 @@ public class Group implements IBaseEntity {
     @Column(name = "version", length = 10)
     private Integer version;
 
-    @ManyToOne
+    @OneToOne
     @NotFound(action= NotFoundAction.IGNORE)
     @JoinColumn(name = "group_leader_id")
     private Employee group_leader;
@@ -70,10 +70,10 @@ public class Group implements IBaseEntity {
 
     @Override
     public String toString() {
-        return "Group{" +
+        return "\tGroup{" +
                 "id=" + id +
                 ", version=" + version +
-                ", group_leader=" + group_leader +
+                ", \n\tgroup_leader=" + group_leader +
                 '}';
     }
 }
