@@ -26,7 +26,7 @@ public class Group implements IBaseEntity {
     @JoinColumn(name = "group_leader_id")
     private Employee group_leader;
 
-    @OneToMany(mappedBy = "group", orphanRemoval = true, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "group", orphanRemoval = true, cascade = CascadeType.MERGE)
     private List<Project> projects = new ArrayList<>();
 
     public Group(){}
@@ -70,7 +70,7 @@ public class Group implements IBaseEntity {
 
     @Override
     public String toString() {
-        return "\tGroup{" +
+        return "\n\tGroup{" +
                 "id=" + id +
                 ", version=" + version +
                 ", \n\tgroup_leader=" + group_leader +

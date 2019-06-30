@@ -2,8 +2,10 @@ package com.pim.service;
 
 
 import com.pim.dao.IProjectRepository;
+import com.pim.dom.Employee;
 import com.pim.dom.Project;
 import com.pim.dom.QProject;
+import com.pim.exception.ConcurrentUpdateProjectException;
 import com.pim.exception.ProjectNotExistsException;
 import com.pim.exception.ProjectNumberAlreadyExistsException;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -15,6 +17,9 @@ import org.springframework.stereotype.Service;
 
 import javax.persistence.*;
 import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaDelete;
+import javax.persistence.criteria.Root;
 import javax.transaction.Transactional;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
@@ -24,9 +29,11 @@ import java.util.stream.StreamSupport;
 public class ProjectService implements IProjectService{
     @PersistenceContext
     private EntityManager entityManager;
-    private SessionFactory sessionFactory;
+    @Autowired
+    private EmployeeService employeeService;
 
     private IProjectRepository projectRepository;
+    private SessionFactory sessionFactory;
 
     private Map<String,String> statusList = new HashMap<String,String>(){
         {
@@ -84,35 +91,74 @@ public class ProjectService implements IProjectService{
         }
     }
 
-    @Override
-    public void saveAll(List<Project> projects) {
-        projectRepository.saveAll(projects);
-    }
 
     @Override
     public void save(Project project) {
+        projectRepository.save(project);
+    }
+
+    @Override
+    public void edit(Project project) {
         Session session = sessionFactory.openSession();
         Transaction transaction = null;
         try {
             transaction = session.beginTransaction();
-//            Query query = session.createQuery("FROM Project WHERE id = :id");
-//            query.setParameter("id", project.getId());
-//
-//            query.setLockMode(LockModeType.OPTIMISTIC_FORCE_INCREMENT);
-//            List<Project> projectList = query.getResultList();
-//            if (projectList.size() == 0) {
-//
-//            } else {
-//                transaction.commit();
-//                Project _project = projectList.get(0);
-//            }
 
-            session.lock("Project", project, LockMode.OPTIMISTIC_FORCE_INCREMENT);
-            session.update("Project", project);
-//            session.lock(project, LockModeType.OPTIMISTIC_FORCE_INCREMENT);
+            Project _project = session.load(Project.class, project.getId());
+
+            _project.setName(project.getName());
+            _project.setProjectnumber(project.getProjectnumber());
+            _project.setGroup(project.getGroup());
+            _project.setCustomer(project.getCustomer());
+            _project.setStatus(project.getStatus());
+            _project.setStartDate(project.getStartDate());
+            _project.setEndDate(project.getEndDate());
+            _project.setEmployees(project.getEmployees());
+
+            Project oldProject = findById(project.getId());
+            if(oldProject.getVersion() == project.getVersion()){
+                throw new ConcurrentUpdateProjectException("Concurrent update project exception");
+            }
             transaction.commit();
+
         }
         catch (RuntimeException e){
+            e.printStackTrace();
+            if(transaction != null)
+                transaction.rollback();
+            throw e;
+        }
+        catch(ProjectNotExistsException e){
+            e.printStackTrace();
+            if(transaction != null)
+                transaction.rollback();
+        }
+        catch (ConcurrentUpdateProjectException e){
+            e.printStackTrace();
+            if(transaction != null)
+                transaction.rollback();
+        }
+        finally {
+            session.close();
+        }
+    }
+
+    @Override
+    @Transactional
+    public void deleteById(Long id) {
+        Session session = sessionFactory.openSession();
+        Transaction transaction = null;
+        try {
+            transaction = session.beginTransaction();
+            CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
+            CriteriaDelete<Project> criteriaDelete = criteriaBuilder.createCriteriaDelete(Project.class);
+            Root projectRoot = criteriaDelete.from(Project.class);
+            criteriaDelete.where(criteriaBuilder.equal(projectRoot.get("id"),id));
+            Query query = session.createQuery(criteriaDelete);
+            query.executeUpdate();
+            transaction.commit();
+        }
+        catch(RuntimeException e){
             e.printStackTrace();
             if(transaction != null)
                 transaction.rollback();
@@ -124,24 +170,48 @@ public class ProjectService implements IProjectService{
     }
 
     @Override
-    public void delete(Project project) {
-        projectRepository.delete(project);
-    }
-
-    @Override
-    @Transactional
-    public void deleteById(Long id) {
-
-        Query query = entityManager.createNativeQuery("delete from project_employee where project_id = :projectid");
-        query.setParameter("projectid", id);
-        query.executeUpdate();
-
-//        projectRepository.deleteById(id);
-    }
-
-    @Override
     public Map<String, String> statusList() {
         return statusList;
+    }
+
+    @Override
+    public String convertEmployeeSetToString(Set<Employee> employeeSet){
+        List<Employee> memberList = new ArrayList<>(employeeSet);
+
+        StringBuilder members = new StringBuilder("");
+        for (int i = 0; i < memberList.size(); i++) {
+            Employee employee = memberList.get(i);
+            String visa = employee.getVisa();
+            String firstName = employee.getFirstName();
+            String lastName = employee.getLastName();
+
+            members.append(visa);
+            members.append(":");
+            members.append(firstName);
+            members.append(lastName);
+            members.append(",");
+        }
+
+        String memberInput = members.toString();
+        int length = memberInput.length();
+        if(length > 0){
+            return memberInput.substring(0, length - 1);
+        }else{
+            return "";
+        }
+    }
+
+    @Override
+    public Set<Employee> convertStringToEmployeeSet(String member){
+        Set<Employee> employeeSet = new HashSet<>();
+        String[] infoMembers = member.split(",");
+        for(int i = 0;i<infoMembers.length;i++){
+            String infoMember = infoMembers[i];
+            String visa = infoMember.substring(0,infoMember.indexOf(':'));
+            Employee employee = employeeService.findByVisa(visa);
+            employeeSet.add(employee);
+        }
+        return employeeSet;
     }
 
     public List<Project> convertIterableToList(Iterable<Project> iterable){

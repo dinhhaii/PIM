@@ -124,7 +124,7 @@
                                     <input id="datepickerEnd" name="endDate" class="form-control" th:value="${#dates.format(project.endDate, 'MM/dd/yyyy')}"/>
                                 </div>
 
-
+                                <input type="hidden" name="version" th:value="${project.version}"/>
                             </div>
 
                             <div class="form-group form-submit">

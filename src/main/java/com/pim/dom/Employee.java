@@ -33,7 +33,7 @@ public class Employee implements IBaseEntity {
 //    @NotFound(action=NotFoundAction.IGNORE)
 //    private Group group;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.ALL}, mappedBy = "employees")
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE}, mappedBy = "employees")
     private Set<Project> projects = new HashSet<>();
 
 
@@ -106,14 +106,13 @@ public class Employee implements IBaseEntity {
 
     @Override
     public String toString() {
-        return "\tEmployee{" +
+        return "\n\tEmployee{" +
                 "id=" + id +
                 ", version=" + version +
                 ", visa='" + visa + '\'' +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", birthDate=" + birthDate +
-                ", \n\tprojects=" + projects +
                 '}';
     }
 }

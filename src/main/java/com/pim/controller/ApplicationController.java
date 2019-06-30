@@ -9,6 +9,7 @@ import com.pim.exception.ProjectNumberAlreadyExistsException;
 import com.pim.service.EmployeeService;
 import com.pim.service.GroupService;
 import com.pim.service.ProjectService;
+import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.json.JsonParseException;
 import org.springframework.http.MediaType;
@@ -27,6 +28,16 @@ public class ApplicationController {
     @Autowired
     private EmployeeService employeeService;
 
+    @RequestMapping(value = {"/","/index","projectlist"}, method = RequestMethod.GET)
+    public String projectlist(Model model){
+        List<Project> projects = projectService.findAll();
+        Map<String,String> statusList = projectService.statusList();
+
+        model.addAttribute("projects", projects);
+        model.addAttribute("statusList", statusList);
+        return "projectlist";
+    }
+
     @RequestMapping(value = {"/newproject"}, method = RequestMethod.GET)
     public String index(Model model){
         List<Group> groups = groupService.findAll();
@@ -39,6 +50,27 @@ public class ApplicationController {
         return "newproject";
     }
 
+    @RequestMapping(value = "/createproject", method = RequestMethod.POST,
+            consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
+            produces = {MediaType.APPLICATION_ATOM_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    public String createProject(@RequestParam(name = "projectnumber") Integer projectnumber,
+                                @RequestParam(name = "name") String name,
+                                @RequestParam(name = "customer") String customer,
+                                @RequestParam(name = "group") Long group_id,
+                                @RequestParam(name = "member") String member,
+                                @RequestParam(name = "status") String status,
+                                @RequestParam(name = "startDate") Date startDate,
+                                @RequestParam(name = "endDate") Date endDate){
+
+        Integer version = 1;
+        Set<Employee> project_employee = projectService.convertStringToEmployeeSet(member);
+        Group group = groupService.findById(group_id);
+        Project project = new Project(version, projectnumber,name,customer,status,startDate,endDate,group, project_employee);
+
+        projectService.save(project);
+        return "redirect:/projectlist";
+    }
+
     @RequestMapping(value = {"/editproject/{id}"}, method = RequestMethod.GET)
     public String editProject(Model model, @PathVariable Long id){
         try {
@@ -47,25 +79,7 @@ public class ApplicationController {
             List<Employee> employees = employeeService.findAll();
             List<Group> groups = groupService.findAll();
             Set<Employee> memberSet = project.getEmployees();
-            List<Employee> memberList = new ArrayList<>(memberSet);
-
-            StringBuilder members = new StringBuilder("");
-            for (int i = 0; i < memberList.size(); i++) {
-                Employee employee = memberList.get(i);
-                String visa = employee.getVisa();
-                String firstName = employee.getFirstName();
-                String lastName = employee.getLastName();
-
-                members.append(visa);
-                members.append(":");
-                members.append(firstName);
-                members.append(lastName);
-                members.append(",");
-            }
-
-            String memberInput = members.toString();
-            int length = memberInput.length();
-            memberInput = memberInput.substring(0, length - 1);
+            String memberInput = projectService.convertEmployeeSetToString(memberSet);
 
             model.addAttribute("members", memberInput);
             model.addAttribute("project", project);
@@ -91,62 +105,23 @@ public class ApplicationController {
                               @RequestParam(name = "member") String member,
                               @RequestParam(name = "status") String status,
                               @RequestParam(name = "startDate") Date startDate,
-                              @RequestParam(name = "endDate") Date endDate){
+                              @RequestParam(name = "endDate") Date endDate,
+                              @RequestParam(name = "version") Integer version){
         //============================
-        Integer version = 0;
-        Set<Employee> project_employee = new HashSet<>();
-
+        Set<Employee> project_employee = projectService.convertStringToEmployeeSet(member);
         Group group = groupService.findById(group_id);
+        System.out.println(project_employee);
         Project project = new Project(id,version,projectnumber,name,customer,status,startDate,endDate,group,project_employee);
-        projectService.save(project);
+
+        projectService.edit(project);
         return "redirect:/projectlist";
     }
 
-    @RequestMapping(value = {"/","/index","projectlist"}, method = RequestMethod.GET)
-    public String projectlist(Model model){
-        List<Project> projects = projectService.findAll();
-        Map<String,String> statusList = projectService.statusList();
-
-        model.addAttribute("projects", projects);
-        model.addAttribute("statusList", statusList);
-        return "projectlist";
-    }
-
-    @RequestMapping(value = "/createproject", method = RequestMethod.POST,
-            consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
-            produces = {MediaType.APPLICATION_ATOM_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
-    public String createProject(@RequestParam(name = "projectnumber") Integer projectnumber,
-                                @RequestParam(name = "name") String name,
-                                @RequestParam(name = "customer") String customer,
-                                @RequestParam(name = "group") Long group_id,
-                                @RequestParam(name = "member") String member,
-                                @RequestParam(name = "status") String status,
-                                @RequestParam(name = "startDate") Date startDate,
-                                @RequestParam(name = "endDate") Date endDate){
-        //============================
-        Integer version = 1;
-        Set<Employee> project_employee = new HashSet<>();
-
-        String[] infoMembers = member.split(",");
-        for(int i = 0;i<infoMembers.length;i++){
-            String infoMember = infoMembers[i];
-            String visa = infoMember.substring(0,infoMember.indexOf(':'));
-            Employee employee = employeeService.findByVisa(visa);
-            project_employee.add(employee);
-        }
-
-        Group group = groupService.findById(group_id);
-        Project project = new Project(version, projectnumber,name,customer,status,startDate,endDate,group, project_employee);
-        System.out.println(project);
-        projectService.save(project);
-        return "redirect:/projectlist";
-    }
 
     @RequestMapping(value = "/deleteproject", method = RequestMethod.POST)
     public String deleteProject(@RequestParam(name = "id") Long id){
         try {
             Project project = projectService.findById(id);
-            System.out.println(project);
             projectService.deleteById(id);
             return "redirect:/projectlist";
         }catch (ProjectNotExistsException e){
