@@ -170,6 +170,42 @@ public class ProjectService implements IProjectService{
     }
 
     @Override
+    public List<Project> search(String keyword, String status) throws ProjectNotExistsException {
+        StringBuilder searchStringBuilder = new StringBuilder("");
+        searchStringBuilder.append("%");
+        searchStringBuilder.append(keyword);
+        searchStringBuilder.append("%");
+        String search = searchStringBuilder.toString();
+
+        String searchWithStatus = "select * from project where (project_number like :search or customer like :search or name like :search) and status = :status order by project_number asc";
+        String searchWithoutStatus = "select project.* from project where project_number like :search or customer like :search or name like :search order by project_number asc";
+        boolean isSearchWithStatus = false;
+
+        if (status != null && !status.equals("")){
+            isSearchWithStatus = true;
+        }
+        List<Project> searchList;
+        if(isSearchWithStatus) {
+            Query query = entityManager.createNativeQuery(searchWithStatus, Project.class);
+            query.setParameter("search", search);
+            query.setParameter("status", status);
+            searchList = query.getResultList();
+        }
+        else{
+            Query query = entityManager.createNativeQuery(searchWithoutStatus, Project.class);
+            query.setParameter("search", search);
+            searchList = query.getResultList();
+        }
+
+        if(searchList.size() == 0){
+            throw new ProjectNotExistsException("Projects is not available");
+        }
+        else{
+            return searchList;
+        }
+    }
+
+    @Override
     public Map<String, String> statusList() {
         return statusList;
     }

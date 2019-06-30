@@ -9,7 +9,6 @@ import com.pim.exception.ProjectNumberAlreadyExistsException;
 import com.pim.service.EmployeeService;
 import com.pim.service.GroupService;
 import com.pim.service.ProjectService;
-import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.json.JsonParseException;
 import org.springframework.http.MediaType;
@@ -29,12 +28,23 @@ public class ApplicationController {
     private EmployeeService employeeService;
 
     @RequestMapping(value = {"/","/index","projectlist"}, method = RequestMethod.GET)
-    public String projectlist(Model model){
+    public String projectlist(Model model, @RequestParam(required = false) String keyword, @RequestParam(required = false) String status){
         List<Project> projects = projectService.findAll();
         Map<String,String> statusList = projectService.statusList();
-
-        model.addAttribute("projects", projects);
         model.addAttribute("statusList", statusList);
+
+        if(keyword == null && status == null){
+            model.addAttribute("projects", projects);
+        }
+        else{
+            try {
+                List<Project> projectSearchList = projectService.search(keyword,status);
+                model.addAttribute("projects", projectSearchList);
+            }catch (ProjectNotExistsException e){
+                e.printStackTrace();
+                return "redirect:/";
+            }
+        }
         return "projectlist";
     }
 
@@ -129,6 +139,8 @@ public class ApplicationController {
             return "redirect:/projectlist";
         }
     }
+
+
 
     @RequestMapping(value = "/createproject/is-available-projectnumber", method = RequestMethod.GET)
     public @ResponseBody boolean checkProjectNumber(@RequestParam(name = "projectnumber") Integer projectnumber) throws ProjectNumberAlreadyExistsException{

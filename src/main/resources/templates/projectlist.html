@@ -73,10 +73,11 @@
                 <div class="content">
                     <div class="content-header" th:utext="#{label.projectlist}"></div>
                     <div class="content-body">
-                        <form>
+                        <form method="post">
                             <div class="form-group form-search">
-                                <input type="text" class="form-control ratio-30" aria-describedby="helpId" th:placeholder="#{label.placeholdersearch}">
-                                <select class="form-control ratio-20" th:placeholder="#{label.placeholderstatus}">
+                                <input type="text" class="form-control ratio-30" th:name="keyword" aria-describedby="helpId" th:placeholder="#{label.placeholdersearch}">
+                                <select class="form-control ratio-20" th:name="status" th:placeholder="#{label.placeholderstatus}">
+                                    <option value=""></option>
                                     <option th:each="status:${statusList}" th:value="${status.key}" th:text="${status.value}"></option>
                                 </select>
                                 <button type="submit" class="btn btn-search ratio-20" th:utext="#{button.searchproject}"></button>
