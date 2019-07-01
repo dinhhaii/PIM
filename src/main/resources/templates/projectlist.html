@@ -76,7 +76,7 @@
                             <div class="form-group form-search">
                                 <input id="inputSearch" type="text" class="form-control ratio-30" th:name="keyword" aria-describedby="helpId" th:value="${keywordSearch}" th:placeholder="#{label.placeholdersearch}">
                                 <select id="selectStatus" class="form-control ratio-20" th:name="status" th:placeholder="#{label.placeholderstatus}">
-                                    <option value="" disabled selected>Project status</option>
+                                    <option value=""></option>
                                     <option th:each="status:${statusList}" th:value="${status.key}" th:selected="${status.key} == ${statusSearch}" th:text="${status.value}"></option>
                                 </select>
                                 <button id="btnSearch" type="submit" class="btn btn-search ratio-20" th:utext="#{button.searchproject}"></button>
