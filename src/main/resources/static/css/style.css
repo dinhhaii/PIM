@@ -15,6 +15,10 @@ body {
     width: 80%;
 }
 
+a {
+    color: #666666;
+}
+
 .nav-pim{
     border-bottom: 1px solid lightgray;
     padding: 10px;

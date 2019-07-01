@@ -73,17 +73,16 @@
                 <div class="content">
                     <div class="content-header" th:utext="#{label.projectlist}"></div>
                     <div class="content-body">
-                        <form method="post">
                             <div class="form-group form-search">
-                                <input type="text" class="form-control ratio-30" th:name="keyword" aria-describedby="helpId" th:placeholder="#{label.placeholdersearch}">
-                                <select class="form-control ratio-20" th:name="status" th:placeholder="#{label.placeholderstatus}">
+                                <input id="inputSearch" type="text" class="form-control ratio-30" th:name="keyword" aria-describedby="helpId" th:value="${keywordSearch}" th:placeholder="#{label.placeholdersearch}">
+                                <select id="selectStatus" class="form-control ratio-20" th:name="status" th:placeholder="#{label.placeholderstatus}">
                                     <option value=""></option>
-                                    <option th:each="status:${statusList}" th:value="${status.key}" th:text="${status.value}"></option>
+                                    <option th:each="status:${statusList}" th:value="${status.key}" th:selected="${status.key} == ${statusSearch}" th:text="${status.value}"></option>
                                 </select>
-                                <button type="submit" class="btn btn-search ratio-20" th:utext="#{button.searchproject}"></button>
-                                <a class="btn btn-resetsearch ratio-20" href="#" role="button" th:utext="#{button.resetsearch}"></a>
+                                <button id="btnSearch" type="submit" class="btn btn-search ratio-20" th:utext="#{button.searchproject}"></button>
+                                <a id="btnResetSearch" class="btn btn-resetsearch ratio-20" href="/" role="button" th:utext="#{button.resetsearch}"></a>
                             </div>
-                        </form>
+
 
                         <table class="table table-borderless table-hover table-pim" id="tblProject">
                             <thead>
@@ -99,13 +98,13 @@
                             </thead>
                             <tbody>
                             <tr th:if="${projects.empty}">
-                                <td class="col-center">No Projects Available</td>
+                                <td colspan="7" class="col-center">No Projects Available</td>
                             </tr>
                             <tr class="clickable-row" th:each="project: ${projects}">
                                 <td class="col-center unclickable">
                                     <input name="" type="checkbox" class="checkitem" th:value="${project.id}">
                                 </td>
-                                <td th:data-href="@{'/editproject/' + ${project.id}}" class="col-right" th:text="${project.projectnumber}"></td>
+                                <td th:data-href="@{'/editproject/' + ${project.id}}" class="col-right"><a th:href="@{'/editproject/' + ${project.id}}" th:text="${project.projectnumber}"></a></td>
                                 <td th:data-href="@{'/editproject/' + ${project.id}}" class="col-left" th:text="${project.name}"></td>
                                 <td th:data-href="@{'/editproject/' + ${project.id}}" class="col-left" th:each="status : ${statusList}" th:if="${status.key} == ${project.status}" th:text="${status.value}"></td>
                                 <td th:data-href="@{'/editproject/' + ${project.id}}" class="col-left" th:text="${project.customer}"></td>
@@ -168,6 +167,7 @@
         crossorigin="anonymous"></script>
 
 <script th:src="@{/js/multilangual.js}"></script>
+<script th:src="@{/js/search.js}"></script>
 <script th:src="@{/js/table.js}"></script>
 </body>
 

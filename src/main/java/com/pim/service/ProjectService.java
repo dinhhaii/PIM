@@ -177,24 +177,30 @@ public class ProjectService implements IProjectService{
         searchStringBuilder.append("%");
         String search = searchStringBuilder.toString();
 
-        String searchWithStatus = "select * from project where (project_number like :search or customer like :search or name like :search) and status = :status order by project_number asc";
-        String searchWithoutStatus = "select project.* from project where project_number like :search or customer like :search or name like :search order by project_number asc";
-        boolean isSearchWithStatus = false;
+        String searchStatusAndKeyword = "select * from project where (project_number like :search or customer like :search or name like :search) and status = :status order by project_number asc";
+        String searchKeyword = "select project.* from project where project_number like :search or customer like :search or name like :search order by project_number asc";
+        String searchStatus = "select project.* from project where status = :status order by project_number asc";
+
+        List<Project> searchList = new ArrayList<>();
 
         if (status != null && !status.equals("")){
-            isSearchWithStatus = true;
-        }
-        List<Project> searchList;
-        if(isSearchWithStatus) {
-            Query query = entityManager.createNativeQuery(searchWithStatus, Project.class);
-            query.setParameter("search", search);
-            query.setParameter("status", status);
-            searchList = query.getResultList();
+            if(keyword == null){
+                Query query = entityManager.createNativeQuery(searchStatus, Project.class);
+                query.setParameter("status", status);
+                searchList = query.getResultList();
+            }else{
+                Query query = entityManager.createNativeQuery(searchStatusAndKeyword, Project.class);
+                query.setParameter("search", search);
+                query.setParameter("status", status);
+                searchList = query.getResultList();
+            }
         }
         else{
-            Query query = entityManager.createNativeQuery(searchWithoutStatus, Project.class);
-            query.setParameter("search", search);
-            searchList = query.getResultList();
+            if(keyword != null){
+                Query query = entityManager.createNativeQuery(searchKeyword, Project.class);
+                query.setParameter("search", search);
+                searchList = query.getResultList();
+            }
         }
 
         if(searchList.size() == 0){

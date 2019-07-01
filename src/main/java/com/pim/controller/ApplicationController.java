@@ -40,9 +40,15 @@ public class ApplicationController {
             try {
                 List<Project> projectSearchList = projectService.search(keyword,status);
                 model.addAttribute("projects", projectSearchList);
+                model.addAttribute("keywordSearch", keyword);
+                model.addAttribute("statusSearch",status);
             }catch (ProjectNotExistsException e){
                 e.printStackTrace();
-                return "redirect:/";
+                projects.clear();
+                model.addAttribute("projects", projects);
+                model.addAttribute("keywordSearch", keyword);
+                model.addAttribute("statusSearch",status);
+                return "projectlist";
             }
         }
         return "projectlist";
@@ -137,6 +143,16 @@ public class ApplicationController {
         }catch (ProjectNotExistsException e){
             e.printStackTrace();
             return "redirect:/projectlist";
+        }
+    }
+
+    @RequestMapping(value = "/deleteselectedproject", method = RequestMethod.POST)
+    public void deleteSelectedProject(@RequestParam(name = "id") Long id){
+        try {
+            Project project = projectService.findById(id);
+            projectService.deleteById(id);
+        }catch (ProjectNotExistsException e){
+            e.printStackTrace();
         }
     }
 

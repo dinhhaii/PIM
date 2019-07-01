@@ -29,11 +29,12 @@ $('#deleteselected').click(function() {
     $('.checkitem:checked').map(function(){
         $.post( "deleteproject",
             { id: $(this).val() },
-            function(data){});
+            function(data){
+                window.location.reload();
+            });
     });
     $('.checkitem:checked').prop('checked',false);
     numberselecteditem = 0;
-    window.location.reload();
 });
 
 //Click Row to go to Edit Page
