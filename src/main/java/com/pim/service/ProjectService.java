@@ -8,6 +8,7 @@ import com.pim.dom.QProject;
 import com.pim.exception.ConcurrentUpdateProjectException;
 import com.pim.exception.ProjectNotExistsException;
 import com.pim.exception.ProjectNumberAlreadyExistsException;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -55,10 +56,15 @@ public class ProjectService implements IProjectService{
 
     @Override
     public List<Project> findAll() {
-        QProject project = QProject.project;
-        JPQLQuery query = new JPAQuery(entityManager);
-        List<Project> projects = query.from(project).fetch();
-        return projects;
+
+        OrderSpecifier<Integer> orderSpecifier = QProject.project.projectnumber.asc();
+        Iterable<Project> projects = projectRepository.findAll(orderSpecifier);
+        List<Project> projectList = convertIterableToList(projects);
+
+        return projectList;
+//        QProject project = QProject.project;
+//        JPQLQuery query = new JPAQuery(entityManager);
+//        List<Project> projects = query.from(project).fetch();
 //        return projectRepository.findAll();
     }
 
@@ -98,7 +104,7 @@ public class ProjectService implements IProjectService{
     }
 
     @Override
-    public void edit(Project project) {
+    public void edit(Project project) throws ConcurrentUpdateProjectException {
         Session session = sessionFactory.openSession();
         Transaction transaction = null;
         try {
@@ -116,7 +122,9 @@ public class ProjectService implements IProjectService{
             _project.setEmployees(project.getEmployees());
 
             Project oldProject = findById(project.getId());
-            if(oldProject.getVersion() == project.getVersion()){
+            if(oldProject.getVersion() != project.getVersion()){
+                if(transaction != null)
+                    transaction.rollback();
                 throw new ConcurrentUpdateProjectException("Concurrent update project exception");
             }
             transaction.commit();
@@ -129,11 +137,6 @@ public class ProjectService implements IProjectService{
             throw e;
         }
         catch(ProjectNotExistsException e){
-            e.printStackTrace();
-            if(transaction != null)
-                transaction.rollback();
-        }
-        catch (ConcurrentUpdateProjectException e){
             e.printStackTrace();
             if(transaction != null)
                 transaction.rollback();

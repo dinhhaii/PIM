@@ -133,7 +133,7 @@ a.active
 }
 
 /* Label and Textbox */
-.form-group > label,select,input {
+.form-group > * {
     height: 30px;
     width: 20%;
 }
@@ -256,6 +256,7 @@ select.form-control {
     border:none;
     border-collapse: collapse;
     border-radius: 5px;
+    background-color: white;
 }
 
 table.table-pim td{
@@ -437,4 +438,8 @@ td .fa.fa-trash {
 .errmessage_custom {
     position: absolute;
     width: 55%;
+}
+
+.flexdatalist-multiple {
+    width: 60%;
 }

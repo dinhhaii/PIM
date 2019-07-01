@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<head>
+    <title>Project Information Management</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!-- Datepicker -->
+    <link href="https://unpkg.com/gijgo@1.9.13/css/gijgo.min.css" rel="stylesheet" type="text/css" />
+    <link th:href="@{/css/style.css}" type="text/css" rel="stylesheet" />
+</head>
+
+<body>
+<!-- Navgation Bar -->
+<nav class="nav nav-pim">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-8 nav-info">
+                <a href="/"><img th:src="@{/img/logo_elca.png}" class="logo"></a>
+                Project Information Management
+            </div>
+            <div class="col-2 nav-selection">
+            </div>
+            <div class="col-2 nav-selection">
+                <a class="nav-selection-custom" href="#" th:utext="#{label.help}"></a>
+                <a class="nav-selection-custom" href="#" th:utext="#{label.login}"></a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Main -->
+<div class="main">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-4">
+                <img th:src="@{/img/error.png}" style="width: 250px; height: 250px; margin-top: 50px; margin-right: 50px; float: right;">
+            </div>
+            <div class="col-8">
+                <div style="margin-top: 80px;margin-left: 50px;">
+                    <p style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: 600; font-size: 14pt;">Unexpect error occurred.</p>
+                    <p style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: 600; font-size: 14pt;">Please <a href="/" style="color: #2F85FA">contact your administrator</a></p>
+                    <p style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: 600; font-size: 14pt;">or <a href="/" style="color: red">back to search project</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+
+<script th:src="@{/js/multilangual.js}"></script>
+<script th:src="@{/js/search.js}"></script>
+<script th:src="@{/js/table.js}"></script>
+</body>
+
+</html>

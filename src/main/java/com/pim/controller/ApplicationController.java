@@ -4,6 +4,7 @@ package com.pim.controller;
 import com.pim.dom.Employee;
 import com.pim.dom.Group;
 import com.pim.dom.Project;
+import com.pim.exception.ConcurrentUpdateProjectException;
 import com.pim.exception.ProjectNotExistsException;
 import com.pim.exception.ProjectNumberAlreadyExistsException;
 import com.pim.service.EmployeeService;
@@ -11,6 +12,7 @@ import com.pim.service.GroupService;
 import com.pim.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.json.JsonParseException;
+import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 @Controller
-public class ApplicationController {
+public class ApplicationController implements ErrorController {
     @Autowired
     private ProjectService projectService;
     @Autowired
@@ -106,7 +108,7 @@ public class ApplicationController {
         }
         catch (ProjectNotExistsException e){
             e.printStackTrace();
-            return "redirect:/";
+            return "redirect:/error";
         }
     }
 
@@ -129,7 +131,12 @@ public class ApplicationController {
         System.out.println(project_employee);
         Project project = new Project(id,version,projectnumber,name,customer,status,startDate,endDate,group,project_employee);
 
-        projectService.edit(project);
+        try {
+            projectService.edit(project);
+        } catch (ConcurrentUpdateProjectException e) {
+            e.printStackTrace();
+            return "redirect:/error";
+        }
         return "redirect:/projectlist";
     }
 
@@ -142,7 +149,7 @@ public class ApplicationController {
             return "redirect:/projectlist";
         }catch (ProjectNotExistsException e){
             e.printStackTrace();
-            return "redirect:/projectlist";
+            return "redirect:/error";
         }
     }
 
@@ -169,4 +176,15 @@ public class ApplicationController {
             return false;
         }
     }
+
+    @Override
+    public String getErrorPath(){
+        return "/error";
+    }
+
+    @RequestMapping(value = "/error")
+    public String error(){
+        return "error";
+    }
+
 }
